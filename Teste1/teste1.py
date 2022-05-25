@@ -11,8 +11,7 @@ import os
 from bs4 import BeautifulSoup
 import requests
 
-URL = '''https://www.gov.br/ans/pt-br/assuntos/consumidor/
-o-que-o-seu-plano-de-saude-deve-cobrir-1/o-que-e-o-rol-de-procedimentos-e-evento-em-saude'''
+URL = 'https://www.gov.br/ans/pt-br/assuntos/consumidor/o-que-o-seu-plano-de-saude-deve-cobrir-1/o-que-e-o-rol-de-procedimentos-e-evento-em-saude'
 FILENAMELIST = ['Anexo I - Lista completa de procedimentos (.pdf)',
                 'Anexo I - Lista completa de procedimentos (.xlsx)',
                 'Anexo II - Diretrizes de utilização (.pdf)',
