@@ -59,7 +59,7 @@ def download_attachments():
     """Encontra os links buscando pelo texto"""
     soup = get_soup(URL)
     for name in FILENAMELIST:
-        # Encontra é atribui o link com o texto correspondente.
+        # Encontra e atribui o link com o texto correspondente.
         link = soup.find(["a"], text=name)
         # Atribui apenas o conteudo do atributo href(url)
         url_to_download = link['href']
