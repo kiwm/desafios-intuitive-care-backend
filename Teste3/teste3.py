@@ -16,33 +16,53 @@ HOSTNAME = 'localhost'
 USERNAME = 'root'
 PASSWORD = 'HYGy8xNh3#a$We'
 DATABASE = 'db_intuitive_care'
+QUARTERS = ['1t2020', '2t2020', '3t2020', '4t2020',
+            '1t2021', '2t2021', '3t2021', '4t2021']
 
-TABLE_RELATORIO = ("""
-            CREATE TABLE relatorio(
-            Registro_ANS bigint,
-            CNPJ text,
-            Razão_Social text,
-            Nome_Fantasia text,
-            Modalidade text,
-            Logradouro text,
-            Número text,
-            Complemento text,
-            Bairro text,
-            Cidade text,
-            UF text,
-            CEP bigint,
-            DDD double,
-            Telefone text,
-            Fax double,
-            Endereço_eletrônico text,
-            Representante text,
-            Cargo_Representante text,
-            Data_Registro_ANS text
+TABLE_RELATORIO = """
+    CREATE TABLE relatorio(
+    Registro_ANS bigint,
+    CNPJ text,
+    Razão_Social text,
+    Nome_Fantasia text,
+    Modalidade text,
+    Logradouro text,
+    Número text,
+    Complemento text,
+    Bairro text,
+    Cidade text,
+    UF text,
+    CEP bigint,
+    DDD double,
+    Telefone text,
+    Fax double,
+    Endereço_eletrônico text,
+    Representante text,
+    Cargo_Representante text,
+    Data_Registro_ANS text
         )
-        """)
+        """
+# Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último trimestre?
+FIRST_SCRIPT = """
+    SELECT razão_social, vl_saldo_final, vl_saldo_inicial, vl_saldo_final - vl_saldo_inicial AS despesas FROM relatorio, 4t2021
+    WHERE reg_ans = registro_ans AND descricao like "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
+    ORDER BY despesas DESC
+    LIMIT 10
+    """
+# Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último ano?
+SECOND_SCRIPT = """
+    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 1t2021 UNION 
+    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 2t2021 UNION 
+    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 3t2021 UNION
+    SELECT razão_social, vl_saldo_final - vl_saldo_inicial AS despesas FROM relatorio, 4t2021
+    WHERE reg_ans = registro_ans AND descricao like "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
+    ORDER BY despesas DESC
+    LIMIT 10
+    """
 
 
 def create_table_relatorio():
+    """Ler o css da tabela relatorio_cadop e upar ela na tabela do banco de dados"""
     try:
         mydb = mysql.connector.connect(
             host=HOSTNAME, user=USERNAME, password=PASSWORD, database=DATABASE)
@@ -66,4 +86,53 @@ def create_table_relatorio():
             mydb.close()
 
 
-create_table_relatorio(TABLE_RELATORIO)
+def create_tables():
+    try:
+        mydb = mysql.connector.connect(
+            host=HOSTNAME, user=USERNAME, password=PASSWORD, database=DATABASE)
+        cursor = mydb.cursor()
+        connection = create_engine(
+            "mysql+mysqldb://root:HYGy8xNh3#a$We@localhost/db_intuitive_care")
+        for quarter in QUARTERS:
+            if(quarter != '4t2021'):
+                cursor.execute(f"""
+                    CREATE TABLE {quarter}(
+                        DATA text,
+                        REG_ANS bigint,
+                        CD_CONTA_CONTABIL bigint,
+                        DESCRICAO text,
+                        VL_SALDO_FINAL text
+                    )
+                    """)
+                data = pandas.read_csv(
+                    quarter + '.csv', encoding='ANSI', sep=';')
+                data_frame = pandas.DataFrame(data)
+                data_frame.to_sql(con=connection, name=quarter,
+                                  index=False, if_exists='append')
+            else:
+                cursor.execute(f"""
+                    CREATE TABLE {quarter}(
+                        DATA text,
+                        REG_ANS bigint,
+                        CD_CONTA_CONTABIL bigint,
+                        DESCRICAO text,
+                        VL_SALDO_INICIAL text,
+                        VL_SALDO_FINAL text
+                    )
+                    """)
+                data = pandas.read_csv(
+                    quarter + '.csv', encoding='UTF-8', sep=';')
+                data_frame = pandas.DataFrame(data)
+                data_frame.to_sql(con=connection, name=quarter,
+                                  index=False, if_exists='append')
+        cursor.close()
+        mydb.commit()
+    except (Exception) as error:
+        print(error)
+    finally:
+        if mydb is not None:
+            mydb.close()
+
+
+create_table_relatorio()
+create_tables()
