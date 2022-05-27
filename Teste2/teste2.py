@@ -6,9 +6,11 @@ Rol de Procedimentos e Eventos em Saúde (todas as páginas);
 2.4 - Bônus: Com a legenda no rodapé substituir os dados
 abreviados das colunas OD e AMB para as respectivas descrições.
 """
-import pandas
+
+
 from zipfile import ZipFile
 import tabula
+import pandas
 
 
 PATH = 'https://www.gov.br/ans/pt-br/arquivos/assuntos/consumidor/o-que-seu-plano-deve-cobrir/Anexo_I_Rol_2021RN_465.2021_RN473_RN478_RN480_RN513_RN536.pdf'

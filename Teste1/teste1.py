@@ -45,7 +45,7 @@ def compress_files():
         with ZipFile('arquivosTeste1.zip', 'w') as zip_obj:
             directory = os.getcwd() + '/arquivosTeste1'
             # Interar todos os arquivos no diretório.
-            for folder_name, sub_folders, file_names in os.walk(directory):
+            for folder_name, _, file_names in os.walk(directory):
                 for file_name in file_names:
                     # Criar o caminho completo do arquivo no diretório.
                     file_path = os.path.join(folder_name, file_name)
