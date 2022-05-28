@@ -8,75 +8,35 @@ Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECI
 """
 
 from sqlalchemy import create_engine
-import mysql.connector
 import pandas
+import sqlalchemy
+from queries import *
 
 
-HOSTNAME = 'localhost'
-USERNAME = 'root'
+HOST = 'localhost'
+USER_NAME = 'root'
 PASSWORD = 'HYGy8xNh3#a$We'
 DATABASE = 'db_intuitive_care'
 QUARTERS = ['1t2020', '2t2020', '3t2020', '4t2020',
             '1t2021', '2t2021', '3t2021', '4t2021']
 
-TABLE_RELATORIO = """
-    CREATE TABLE relatorio(
-    Registro_ANS bigint,
-    CNPJ text,
-    Razão_Social text,
-    Nome_Fantasia text,
-    Modalidade text,
-    Logradouro text,
-    Número text,
-    Complemento text,
-    Bairro text,
-    Cidade text,
-    UF text,
-    CEP bigint,
-    DDD double,
-    Telefone text,
-    Fax double,
-    Endereço_eletrônico text,
-    Representante text,
-    Cargo_Representante text,
-    Data_Registro_ANS text
-        )
-        """
-# Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último trimestre?
-FIRST_SCRIPT = """
-    SELECT razão_social, vl_saldo_final, vl_saldo_inicial, vl_saldo_final - vl_saldo_inicial AS despesas FROM relatorio, 4t2021
-    WHERE reg_ans = registro_ans AND descricao like "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
-    ORDER BY despesas DESC
-    LIMIT 10
-    """
-# Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último ano?
-SECOND_SCRIPT = """
-    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 1t2021 UNION 
-    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 2t2021 UNION 
-    SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, 3t2021 UNION
-    SELECT razão_social, vl_saldo_final - vl_saldo_inicial AS despesas FROM relatorio, 4t2021
-    WHERE reg_ans = registro_ans AND descricao like "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
-    ORDER BY despesas DESC
-    LIMIT 10
-    """
 
-
-def create_table_relatorio():
+def create_table_report():
     """Ler o css da tabela relatorio_cadop e upar ela na tabela do banco de dados"""
     try:
         engine = create_engine(
-            "mysql+mysqldb://root:HYGy8xNh3#a$We@localhost/db_intuitive_care")
+            f"mysql+mysqldb://{USER_NAME}:{PASSWORD}@{HOST}/{DATABASE}")
         connection = engine.raw_connection()
         cursor = connection.cursor()
-        cursor.execute(TABLE_RELATORIO)
-
+        cursor.execute(table_report())
         data = pandas.read_csv('Relatorio_cadop teste 3.csv',
                                encoding='ANSI', sep=';', header=2)
         data_frame = pandas.DataFrame(data)
+        # Limpar os dados
         data_frame.rename(columns={'Registro ANS': 'Registro_ANS', 'Razão Social': 'Razão_Social', 'Nome Fantasia': 'Nome_Fantasia',
                           'Endereço eletrônico': 'Endereço_eletrônico', 'Cargo Representante': 'Cargo_Representante', 'Data Registro ANS': 'Data_Registro_ANS'}, inplace=True)
         data_frame.to_sql(con=engine, name='relatorio',
-                          index=False, if_exists='append')
+                          index=False, if_exists='append', chunksize=1000)
         cursor.close()
         connection.commit()
     except (Exception) as error:
@@ -88,51 +48,64 @@ def create_table_relatorio():
 
 def create_tables():
     try:
-        mydb = mysql.connector.connect(
-            host=HOSTNAME, user=USERNAME, password=PASSWORD, database=DATABASE)
-        cursor = mydb.cursor()
-        connection = create_engine(
-            "mysql+mysqldb://root:HYGy8xNh3#a$We@localhost/db_intuitive_care")
+        engine = create_engine(
+            f"mysql+mysqldb://{USER_NAME}:{PASSWORD}@{HOST}/{DATABASE}")
+        connection = engine.raw_connection()
+        cursor = connection.cursor()
         for quarter in QUARTERS:
+            # Pular a última tabela pois ela tem uma coluna a mais.
             if(quarter != '4t2021'):
-                cursor.execute(f"""
-                    CREATE TABLE {quarter}(
-                        DATA text,
-                        REG_ANS bigint,
-                        CD_CONTA_CONTABIL bigint,
-                        DESCRICAO text,
-                        VL_SALDO_FINAL text
-                    )
-                    """)
+                cursor.execute(table_quarter(quarter))
                 data = pandas.read_csv(
-                    quarter + '.csv', encoding='ANSI', sep=';')
+                    quarter + '.csv', encoding='ANSI', sep=';', engine='c')
                 data_frame = pandas.DataFrame(data)
-                data_frame.to_sql(con=connection, name=quarter,
-                                  index=False, if_exists='append')
+                data_frame.replace(',', '.', regex=True, inplace=True)
+                data_frame.to_sql(con=engine, name='trimestre_'+quarter,
+                                  index=False, if_exists='append', chunksize=1000, dtype={'VL_SALDO_FINAL': sqlalchemy.FLOAT})
             else:
-                cursor.execute(f"""
-                    CREATE TABLE {quarter}(
-                        DATA text,
-                        REG_ANS bigint,
-                        CD_CONTA_CONTABIL bigint,
-                        DESCRICAO text,
-                        VL_SALDO_INICIAL text,
-                        VL_SALDO_FINAL text
-                    )
-                    """)
+                cursor.execute(table_last_quarter(quarter))
                 data = pandas.read_csv(
                     quarter + '.csv', encoding='UTF-8', sep=';')
                 data_frame = pandas.DataFrame(data)
-                data_frame.to_sql(con=connection, name=quarter,
-                                  index=False, if_exists='append')
+                data_frame.replace(',', '.', regex=True, inplace=True)
+                data_frame.to_sql(con=engine, name='trimestre_'+quarter,
+                                  index=False, if_exists='append', chunksize=1000, dtype={'VL_SALDO_FINAL': sqlalchemy.FLOAT, 'VL_SALDO_INICIAL': sqlalchemy.FLOAT})
         cursor.close()
-        mydb.commit()
+        connection.commit()
     except (Exception) as error:
         print(error)
     finally:
-        if mydb is not None:
-            mydb.close()
+        if connection is not None:
+            connection.close()
 
 
-create_table_relatorio()
-#create_tables()
+def show_select(querie):
+    try:
+        engine = create_engine(
+            f"mysql+mysqldb://{USER_NAME}:{PASSWORD}@{HOST}/{DATABASE}")
+        connection = engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(querie)
+        records = cursor.fetchone()
+        while records is not None:
+            print(records)
+            records = cursor.fetchone()
+        cursor.close()
+        connection.commit()
+    except (Exception) as error:
+        print(error)
+    finally:
+        if connection is not None:
+            connection.close()
+
+
+def main():
+    """Metodo main."""
+    create_table_report()
+    create_tables()
+    show_select(first_script())
+    show_select(second_script())
+
+
+if __name__ == "__main__":
+    main()
