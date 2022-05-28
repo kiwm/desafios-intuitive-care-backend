@@ -10,30 +10,33 @@ abreviados das colunas OD e AMB para as respectivas descrições.
 
 from zipfile import ZipFile
 import tabula
-import pandas
 
 
 PATH = 'https://www.gov.br/ans/pt-br/arquivos/assuntos/consumidor/o-que-seu-plano-deve-cobrir/Anexo_I_Rol_2021RN_465.2021_RN473_RN478_RN480_RN513_RN536.pdf'
-TABLE = 'Rol de Procedimentos e Eventos em Saúde'
+TABLE_NAME = 'Rol de Procedimentos e Eventos em Saúde.csv'
 
 
 def compress_csv():
     """Compacta todos os arquivos."""
     with ZipFile('Teste_Joao_Pedro_Carvalho.zip', 'w') as zip_obj:
         # Adicionar arquivo ao zip.
-        zip_obj.write(TABLE + '.csv')
+        zip_obj.write(TABLE_NAME)
 
 
 def extract_csv():
-    """Extrair as tabelas csv do pdf(Anexo I)"""
+    """Extrair os dataframes do pdf(Anexo I)."""
     data_frames = tabula.read_pdf(PATH, pages='all')
-    data_frame = pandas.concat(data_frames)
-    # Modificar os nomes das colunas
-    data_frame = data_frame.rename({"OD": "Seg. Odontológica",
-                                    "AMB": "Seg. Ambulatorial"}, axis='columns')
-    # Faz a comversão do pdf para csv.
-    data_frame.to_csv(TABLE + '.csv', mode='a',
-                      encoding='utf-8', index=False, header=True)
+
+    for data_frame in data_frames:
+        # Modificar os nomes das colunas.
+        data_frame = data_frame.rename({"OD": "Seg. Odontológica",
+                                        "AMB": "Seg. Ambulatorial",
+                                        "RN\r(alteração)": "RN (alteração)"}, axis='columns')
+        # Faz uma limpeza nos dados.
+        data_frame = data_frame.replace(',', '.', regex=True)
+        data_frame = data_frame.replace('\r',  ' ', regex=True)
+        # Faz a comversão do pdf para csv, mode = append.
+        data_frame.to_csv(TABLE_NAME, encoding='utf-8', index=False, mode='a')
 
 
 def main():
