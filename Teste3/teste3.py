@@ -64,26 +64,26 @@ SECOND_SCRIPT = """
 def create_table_relatorio():
     """Ler o css da tabela relatorio_cadop e upar ela na tabela do banco de dados"""
     try:
-        mydb = mysql.connector.connect(
-            host=HOSTNAME, user=USERNAME, password=PASSWORD, database=DATABASE)
-        cursor = mydb.cursor()
-        cursor.execute(TABLE_RELATORIO)
-        connection = create_engine(
+        engine = create_engine(
             "mysql+mysqldb://root:HYGy8xNh3#a$We@localhost/db_intuitive_care")
+        connection = engine.raw_connection()
+        cursor = connection.cursor()
+        cursor.execute(TABLE_RELATORIO)
+
         data = pandas.read_csv('Relatorio_cadop teste 3.csv',
                                encoding='ANSI', sep=';', header=2)
         data_frame = pandas.DataFrame(data)
         data_frame.rename(columns={'Registro ANS': 'Registro_ANS', 'Razão Social': 'Razão_Social', 'Nome Fantasia': 'Nome_Fantasia',
                           'Endereço eletrônico': 'Endereço_eletrônico', 'Cargo Representante': 'Cargo_Representante', 'Data Registro ANS': 'Data_Registro_ANS'}, inplace=True)
-        data_frame.to_sql(con=connection, name='relatorio',
+        data_frame.to_sql(con=engine, name='relatorio',
                           index=False, if_exists='append')
         cursor.close()
-        mydb.commit()
+        connection.commit()
     except (Exception) as error:
         print(error)
     finally:
-        if mydb is not None:
-            mydb.close()
+        if connection is not None:
+            connection.close()
 
 
 def create_tables():
@@ -135,4 +135,4 @@ def create_tables():
 
 
 create_table_relatorio()
-create_tables()
+#create_tables()
