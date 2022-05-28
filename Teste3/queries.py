@@ -1,3 +1,6 @@
+"""Agrupar as queries sql."""
+
+
 def table_report():
     """Sql para criar a tabela do relatorio"""
     return """
@@ -25,6 +28,7 @@ def table_report():
     """
 
 def table_quarter(quarter):
+    """Sql para criar as tabelas trimestrais"""
     return f"""
     CREATE TABLE trimestre_{quarter}(
     DATA text,
@@ -36,6 +40,7 @@ def table_quarter(quarter):
     """
 
 def table_last_quarter(quarter):
+    """Sql para criar a última tabela trimestral"""
     return f"""
     CREATE TABLE trimestre_{quarter}(
     DATA text,
@@ -48,17 +53,23 @@ def table_last_quarter(quarter):
     """
 
 def first_script():
-    """Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último trimestre?"""
+    """Quais as 10 operadoras que mais tiveram despesas com
+    "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA
+    A SAÚDE MEDICO HOSPITALAR" no último trimestre?"""
     return """
-    SELECT razão_social, vl_saldo_final, vl_saldo_inicial, vl_saldo_final - vl_saldo_inicial AS despesas FROM relatorio, trimestre_4t2021
-    WHERE reg_ans = registro_ans AND descricao LIKE "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
+    SELECT razão_social, vl_saldo_final, vl_saldo_inicial, vl_saldo_final - vl_saldo_inicial 
+    AS despesas FROM relatorio, trimestre_4t2021
+    WHERE reg_ans = registro_ans AND descricao 
+    LIKE "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR "
     ORDER BY despesas DESC
     LIMIT 10
     """
 
 
 def second_script():
-    """Quais as 10 operadoras que mais tiveram despesas com "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último ano?"""
+    """Quais as 10 operadoras que mais tiveram despesas com
+    "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA
+    A SAÚDE MEDICO HOSPITALAR" no último ano?"""
     return """
     SELECT razão_social, vl_saldo_final AS despesas FROM relatorio, trimestre_1t2021 
     WHERE reg_ans = registro_ans AND descricao 
