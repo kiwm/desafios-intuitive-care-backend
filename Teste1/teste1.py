@@ -12,11 +12,11 @@ from bs4 import BeautifulSoup
 import requests
 
 URL = 'https://www.gov.br/ans/pt-br/assuntos/consumidor/o-que-o-seu-plano-de-saude-deve-cobrir-1/o-que-e-o-rol-de-procedimentos-e-evento-em-saude'
-FILENAMELIST = ['Anexo I - Lista completa de procedimentos (.pdf)',
-                'Anexo I - Lista completa de procedimentos (.xlsx)',
-                'Anexo II - Diretrizes de utilização (.pdf)',
-                'Anexo III - Diretrizes clínicas (.pdf)',
-                'Anexo IV - Protocolo de utilização (.pdf)']
+FILE_NAME_LIST = ['Anexo I - Lista completa de procedimentos (.pdf)',
+                  'Anexo I - Lista completa de procedimentos (.xlsx)',
+                  'Anexo II - Diretrizes de utilização (.pdf)',
+                  'Anexo III - Diretrizes clínicas (.pdf)',
+                  'Anexo IV - Protocolo de utilização (.pdf)']
 
 
 def get_soup(url):
@@ -58,7 +58,7 @@ def compress_files():
 def download_attachments():
     """Encontra os links buscando pelo texto"""
     soup = get_soup(URL)
-    for name in FILENAMELIST:
+    for name in FILE_NAME_LIST:
         # Encontra e atribui o link com o texto correspondente.
         link = soup.find(["a"], text=name)
         # Atribui apenas o conteudo do atributo href(url)
