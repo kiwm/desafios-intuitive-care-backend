@@ -47,9 +47,11 @@ Baixar o CSV que esta em anexo no email.
 # Bibliotecas necessárias para a execução:
 
 ```
-sudo pip install requests
-sudo pip install beautifulsoup4
-sudo pip install tabula-py
+pip install requests
+pip install beautifulsoup4
+pip install tabula-py
+pip install pandas
+pip install SQLAlchemy
 ```
 
 

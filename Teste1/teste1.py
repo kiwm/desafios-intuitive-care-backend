@@ -58,6 +58,11 @@ def compress_files():
 def download_attachments():
     """Encontra os links buscando pelo texto"""
     soup = get_soup(URL)
+    # Criar o diretório para colocar os arquivos se ele não existir.
+    if os.path.isdir('Teste1/arquivosTeste1'):
+        print('Pasta existe!')
+    else:
+        os.mkdir('Teste1/arquivosTeste1')
     for name in FILE_NAME_LIST:
         # Encontra e atribui o link com o texto correspondente.
         link = soup.find(["a"], text=name)
@@ -69,7 +74,7 @@ def download_attachments():
 
 def main():
     """Metodo main."""
-    # download_attachments()
+    download_attachments()
     compress_files()
 
 
