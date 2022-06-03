@@ -30,7 +30,7 @@ def download_file(url, file_name):
     try:
         # Stream = true prepara os dados para serem lidos em chunks.
         with requests.get(url, stream=True) as request:
-            with open('arquivosTeste1/' + file_name, 'wb') as file:
+            with open('Teste1/arquivosTeste1/' + file_name, 'wb') as file:
                 # Limita o uso de memória independente do tamanho do arquivo baixado.
                 for chunk in request.iter_content(chunk_size=8192):
                     if chunk:
@@ -42,8 +42,8 @@ def download_file(url, file_name):
 def compress_files():
     """Compacta todos os arquivos."""
     try:
-        with ZipFile('arquivosTeste1.zip', 'w') as zip_obj:
-            directory = os.getcwd() + '/arquivosTeste1'
+        with ZipFile('Teste1/arquivosTeste1.zip', 'w') as zip_obj:
+            directory = os.getcwd() + '/Teste1/arquivosTeste1'
             # Interar todos os arquivos no diretório.
             for folder_name, _, file_names in os.walk(directory):
                 for file_name in file_names:
@@ -69,7 +69,7 @@ def download_attachments():
 
 def main():
     """Metodo main."""
-    download_attachments()
+    # download_attachments()
     compress_files()
 
 

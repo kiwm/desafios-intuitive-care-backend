@@ -18,9 +18,9 @@ TABLE_NAME = 'Rol de Procedimentos e Eventos em Saúde.csv'
 
 def compress_csv():
     """Compacta todos os arquivos."""
-    with ZipFile('Teste_Joao_Pedro_Carvalho.zip', 'w') as zip_obj:
+    with ZipFile('Teste2/Rol de Procedimentos e Eventos em Saúde.zip', 'w') as zip_obj:
         # Adicionar arquivo ao zip.
-        zip_obj.write(TABLE_NAME)
+        zip_obj.write('Teste2/'+TABLE_NAME)
 
 
 def extract_csv():
@@ -36,7 +36,8 @@ def extract_csv():
         data_frame = data_frame.replace(',', '.', regex=True)
         data_frame = data_frame.replace('\r',  ' ', regex=True)
         # Faz a comversão do pdf para csv, mode = append.
-        data_frame.to_csv(TABLE_NAME, encoding='utf-8', index=False, mode='a')
+        data_frame.to_csv('Teste2/'+TABLE_NAME,
+                          encoding='utf-8', index=False, mode='a')
 
 
 def main():

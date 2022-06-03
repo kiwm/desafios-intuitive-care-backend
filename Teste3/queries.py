@@ -27,6 +27,7 @@ def table_report():
     )
     """
 
+
 def table_quarter(quarter):
     """Sql para criar as tabelas trimestrais"""
     return f"""
@@ -38,6 +39,7 @@ def table_quarter(quarter):
     VL_SALDO_FINAL float
     )
     """
+
 
 def table_last_quarter(quarter):
     """Sql para criar a última tabela trimestral"""
@@ -51,6 +53,7 @@ def table_last_quarter(quarter):
     VL_SALDO_FINAL float
     )
     """
+
 
 def first_script():
     """Quais as 10 operadoras que mais tiveram despesas com

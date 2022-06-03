@@ -16,7 +16,7 @@ import pandas
 import sqlalchemy
 from queries import table_report, table_quarter, table_last_quarter, first_script, second_script
 
-
+# É necessário criar um banco de dados é atualizar essas constantes.
 HOST = 'localhost'
 USER_NAME = 'root'
 PASSWORD = 'HYGy8xNh3#a$We'
@@ -33,7 +33,7 @@ def create_table_report():
         connection = engine.raw_connection()
         cursor = connection.cursor()
         cursor.execute(table_report())
-        data = pandas.read_csv('Relatorio_cadop teste 3.csv',
+        data = pandas.read_csv('Teste3/Relatorio_cadop teste 3.csv',
                                encoding='ANSI', sep=';', header=2)
         data_frame = pandas.DataFrame(data)
         # Limpar os dados
@@ -65,7 +65,7 @@ def create_tables():
             if quarter != '4t2021':
                 cursor.execute(table_quarter(quarter))
                 data = pandas.read_csv(
-                    quarter + '.csv', encoding='ANSI', sep=';', engine='c')
+                    'Teste3/'+quarter+'.csv', encoding='ANSI', sep=';', engine='c')
                 data_frame = pandas.DataFrame(data)
                 # Limpar os dados
                 data_frame.replace(',', '.', regex=True, inplace=True)
@@ -75,7 +75,7 @@ def create_tables():
             else:
                 cursor.execute(table_last_quarter(quarter))
                 data = pandas.read_csv(
-                    quarter + '.csv', encoding='UTF-8', sep=';')
+                    'Teste3/'+quarter + '.csv', encoding='UTF-8', sep=';')
                 data_frame = pandas.DataFrame(data)
                 # Limpar os dados
                 data_frame.replace(',', '.', regex=True, inplace=True)
@@ -105,6 +105,7 @@ def show_select(querie):
         while records is not None:
             print(records)
             records = cursor.fetchone()
+        print('------------------------------')
         cursor.close()
         connection.commit()
     except (Exception) as error:
